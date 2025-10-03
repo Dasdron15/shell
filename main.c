@@ -1,8 +1,10 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 void shell_loop(void);
 char *shell_read(void);
+char **shell_parse(char *line);
 
 int main(void) {
     shell_loop();
@@ -15,9 +17,12 @@ void shell_loop(void) {
         printf("> ");
 
         char *line = shell_read();
+        char **line_split = shell_parse(line);
+
         printf("%s\n", line);
 
         free(line);
+        free(line_split);
     }
 }
 
@@ -53,5 +58,39 @@ char *shell_read(void) {
         }
     }
 
+    return buffer;
+}
+
+char **shell_parse(char *line) {
+    int bufsize = 128;
+    int count = 0;
+
+    char *line_copy = malloc(sizeof(line));
+    strcpy(line_copy, line);
+
+    char **buffer = malloc(sizeof(char*) * bufsize);
+    if (!buffer) {
+        perror("Memory allocation failed");
+        exit(1);
+    }
+
+    char *token;
+    token = strtok(line, " ");
+
+    while (token) {
+        buffer[count++] = strdup(token);
+        token = strtok(NULL, " ");
+
+        if (count >= bufsize) {
+            bufsize *= 2;
+            buffer = realloc(buffer, sizeof(char*) * bufsize);
+            if (!buffer) {
+                perror("Memory reallocation failed");
+                exit(1);
+            }
+        }
+    }
+
+    free(line_copy);
     return buffer;
 }
