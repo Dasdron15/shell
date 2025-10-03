@@ -23,9 +23,14 @@ void shell_loop(void) {
 
 char *shell_read(void) {
     int bufsize = 1024;
-    char *buffer = malloc(sizeof(char) * bufsize);
     int position = 0;
     int c;
+
+    char *buffer = malloc(bufsize);
+    if (!buffer) {
+        perror("Memory allocation failed");
+        exit(1);
+    }
 
     while (1) {
         c = getchar();
@@ -37,6 +42,15 @@ char *shell_read(void) {
         }
 
         position++;
+
+        if (position >= bufsize) {
+            bufsize *= 2;
+            buffer = realloc(buffer, bufsize);
+            if (!buffer) {
+                perror("Memory reallocation failed");
+                exit(1);
+            }
+        }
     }
 
     return buffer;
