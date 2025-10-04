@@ -19,7 +19,9 @@ void shell_loop(void) {
         char *line = shell_read();
         char **line_split = shell_parse(line);
 
-        printf("%s\n", line);
+        for (int i = 0; line_split[i]; i++) {
+            printf("%s\n", line_split[i]);
+        }
 
         free(line);
         free(line_split);
