@@ -31,6 +31,7 @@ void shell_loop(void) {
 
         free(line);
         free(line_split);
+        printf("\n");
     }
 }
 
@@ -124,6 +125,7 @@ void shell_launch(char **args) {
     }
     if (strcmp(args[0], "cd") == 0) {
         shell_cd(args);
+        return;
     }
 
     pid_t pid, wpid;
