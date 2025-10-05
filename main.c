@@ -107,6 +107,10 @@ void shell_cd(char **args) {
 
     if (path == NULL) {
         struct passwd *pw = getpwuid(getuid());
+        if (!pw) {
+            perror("type shit");
+        }
+    
         path = pw->pw_dir;
     }
 
