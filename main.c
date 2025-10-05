@@ -107,12 +107,12 @@ void shell_launch(char **args) {
 
     if (pid == 0) {
         execvp(args[0], args);
-        perror("lsh");
+        fprintf(stderr, "dsh: command not found: %s\n", args[0]);
         exit(1);
     } else if (pid > 0) {
         wait(NULL);
     } else {
-        perror("lsh");
+        fprintf(stderr, "dsh: command not found: %s\n", args[0]);
         exit(1);
     }
 }
