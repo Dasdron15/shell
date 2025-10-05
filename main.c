@@ -1,10 +1,12 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 
 void shell_loop(void);
 char *shell_read(void);
 char **shell_parse(char *line);
+void shell_launch(char **args);
 
 int main(void) {
     shell_loop();
@@ -19,9 +21,7 @@ void shell_loop(void) {
         char *line = shell_read();
         char **line_split = shell_parse(line);
 
-        for (int i = 0; line_split[i]; i++) {
-            printf("%s\n", line_split[i]);
-        }
+        shell_launch(line_split);
 
         free(line);
         free(line_split);
@@ -67,9 +67,6 @@ char **shell_parse(char *line) {
     int bufsize = 128;
     int count = 0;
 
-    char *line_copy = malloc(sizeof(line));
-    strcpy(line_copy, line);
-
     char **buffer = malloc(sizeof(char*) * bufsize);
     if (!buffer) {
         perror("Memory allocation failed");
@@ -80,8 +77,8 @@ char **shell_parse(char *line) {
     token = strtok(line, " ");
 
     while (token) {
-        buffer[count++] = strdup(token);
-        token = strtok(NULL, " ");
+        buffer[count] = token;
+        count++;
 
         if (count >= bufsize) {
             bufsize *= 2;
@@ -91,8 +88,31 @@ char **shell_parse(char *line) {
                 exit(1);
             }
         }
+
+        token = strtok(NULL, " ");
     }
 
-    free(line_copy);
     return buffer;
+}
+
+void shell_launch(char **args) {
+    if (strcmp(args[0], "exit") == 0) {
+        exit(0);
+    }
+
+    pid_t pid, wpid;
+    int status;
+    
+    pid = fork();
+
+    if (pid == 0) {
+        execvp(args[0], args);
+        perror("lsh");
+        exit(1);
+    } else if (pid > 0) {
+        wait(NULL);
+    } else {
+        perror("lsh");
+        exit(1);
+    }
 }
