@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pwd.h>
 
 void shell_loop(void);
 char *shell_read(void);
@@ -15,7 +16,12 @@ int main(void) {
 }
 
 void shell_loop(void) {
+    char cwd[PATH_MAX];
+
     while (1) {
+        getcwd(cwd, sizeof(cwd));
+
+        printf("%s\n", cwd);
         printf("> ");
 
         char *line = shell_read();
@@ -95,9 +101,29 @@ char **shell_parse(char *line) {
     return buffer;
 }
 
+void shell_cd(char **args) {
+    char *path = args[1];
+
+    if (path == NULL) {
+        struct passwd *pw = getpwuid(getuid());
+        path = pw->pw_dir;
+    }
+
+    if (chdir(path) != 0) {
+        perror("cd");
+    }
+}
+
 void shell_launch(char **args) {
+    if (!args[0]) {
+        return;
+    }
+
     if (strcmp(args[0], "exit") == 0) {
         exit(0);
+    }
+    if (strcmp(args[0], "cd") == 0) {
+        shell_cd(args);
     }
 
     pid_t pid, wpid;
