@@ -67,15 +67,17 @@ char *shell_read(void) {
         }
     }
 
+    buffer[position] = '\0';
+
     return buffer;
 }
 
 char **shell_parse(char *line) {
     int bufsize = 128;
-    int count = 0;
+    int position = 0;
 
-    char **buffer = malloc(sizeof(char*) * bufsize);
-    if (!buffer) {
+    char **args = malloc(sizeof(char*) * bufsize);
+    if (!args) {
         perror("Memory allocation failed");
         exit(1);
     }
@@ -84,13 +86,13 @@ char **shell_parse(char *line) {
     token = strtok(line, " ");
 
     while (token) {
-        buffer[count] = token;
-        count++;
+        args[position] = token;
+        position++;
 
-        if (count >= bufsize) {
+        if (position >= bufsize) {
             bufsize *= 2;
-            buffer = realloc(buffer, sizeof(char*) * bufsize);
-            if (!buffer) {
+            args = realloc(args, sizeof(char*) * bufsize);
+            if (!args) {
                 perror("Memory reallocation failed");
                 exit(1);
             }
@@ -99,7 +101,8 @@ char **shell_parse(char *line) {
         token = strtok(NULL, " ");
     }
 
-    return buffer;
+    args[position] = NULL;
+    return args;
 }
 
 void shell_cd(char **args) {
